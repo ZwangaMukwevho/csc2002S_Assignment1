@@ -2,44 +2,44 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.io.FileWriter;
+import java.util.ArrayList;
 
 public class hello{  
     public static void main(final String args[]) {
 
         // Defining local variables
         int[] m = new int[2];
-        m = arraySize("zwanga");
+        m = arraySize("med_in.txt");
         int rows = m[0];
         int cols = m[1];
         float[][] matrix = new float[rows][cols];
-        matrix = readData("zwanga");
+        matrix = readData("med_in.txt");
         
         try{
-        int basinNumber = comparisons(m[0]-2,matrix,rows,cols);
+        int basinNumber = comparisons(m[0]-2,matrix,rows,cols,"med_out.txt");
         System.out.println(basinNumber);}
         catch (InterruptedException e) {
 			//TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-       
+		}     
         
     }
 
 
-    public static float[][] readData(final String fileName) {
+    public static float[][] readData(final String fileName ) {
       
         int loopLength;
-        
+        String Name = fileName;
         // Getting rows and columns of the grid
         int[] m = new int[2];
-        m = arraySize("zwanga");
+        m = arraySize(Name);
 
         final float[][] matrix = new float[m[0]][m[1]];
 
         // Reading in the data from the text files
-    
-        final File file = new File("C:\\Users\\zwang\\Documents\\med_in.txt");
+        
+        final File file = new File(Name);
         try {
             final Scanner sc = new Scanner(file);
 
@@ -73,7 +73,8 @@ public class hello{
 
 
         // Reading in the data from the text files
-        final File file = new File("C:\\Users\\zwang\\Documents\\med_in.txt");
+        String Name = fileName;
+        final File file = new File(Name);
         try {
             final Scanner sc = new Scanner(file);
 
@@ -93,9 +94,9 @@ public class hello{
            
     }
 
-    public static int comparisons(int numTs, float [][] m, int rows, int cols) throws InterruptedException{
+    public static int comparisons(int numTs, float [][] m, int rows, int cols,String outName) throws InterruptedException{
         //Variable to hold the number of basins
-        int basins = 0;
+        int basinNumber = 0;
 
         //Creating the number of thread object
         Thread[] ts = new Thread[numTs];
@@ -122,19 +123,43 @@ public class hello{
             counter = counter + 1;
         }
 
+        //Arraylist to hold columns that represent basins found
+        ArrayList<String> columns = new ArrayList<String>();
+        ArrayList<String> row = new ArrayList<String>();
         
+        //Wrting to output file
+        String tempWriter = "";
+       
+           
         for(int p = 0;p < numTs;p++){
             ts[p].join();
-            basins = basins + ts[p].basinNumber; 
+            basinNumber = basinNumber + ts[p].basinNumber; 
+
             for(int r = 0; r<ts[p].cols.size() ; r ++) {
-                System.out.println(ts[p].row+" "+ ts[p].cols.get(r));     
-        }}
+                row.add(String.valueOf(ts[p].row));
+                columns.add(String.valueOf(ts[p].cols.get(r)));}
+                                                    }
+           
+        try{
+            FileWriter writer = new FileWriter(outName);  
+            tempWriter = String.valueOf(basinNumber) + "\n";
+            writer.write(tempWriter);
 
-       
+            for(int s = 0; s<row.size();s++){
+                tempWriter = row.get(s) + " " + columns.get(s) + "\n";
+                writer.write(tempWriter);
+            }
+            writer.close();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+           
+        }
 
-        
-        return basins;
+
+        return basinNumber;
     }
+    
 
     
 }
