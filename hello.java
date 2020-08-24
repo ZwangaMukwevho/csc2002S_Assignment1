@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.concurrent.ForkJoinPool;
 
 public class hello{  
     public static void main(final String args[]) {
@@ -14,15 +15,19 @@ public class hello{
         int rows = m[0];
         int cols = m[1];
         float[][] matrix = new float[rows][cols];
-        matrix = readData("med_in.txt");
+        float [] threads = new float[rows*cols];
         
-        try{
-        int basinNumber = comparisons(m[0]-2,matrix,rows,cols,"med_out.txt");
-        System.out.println(basinNumber);}
-        catch (InterruptedException e) {
-			//TODO Auto-generated catch block
-			e.printStackTrace();
-		}     
+        matrix =  readData("med_in.txt");
+        threads = singeDimensionArrayData("med_in.txt");
+
+        int tempRow = 0;
+        int tempCol = 0;
+        int length = rows*cols; 
+        int basinNumber = 0;
+        int basins = comparisons(matrix, threads, cols, rows);
+        System.out.println(basins);
+
+      
         
     }
 
@@ -59,9 +64,40 @@ public class hello{
         } catch (final IOException e) {
             e.printStackTrace();
         }
-
         return matrix;
+    }
 
+    public static float[] singeDimensionArrayData(final String fileName){
+        int loopLength;
+        String Name = fileName;
+        // Getting rows and columns of the grid
+        final float[] array;
+        final float[] temparr = new float[1];
+
+        // Reading in the data from the text files
+        
+        final File file = new File(Name);
+        try {
+            final Scanner sc = new Scanner(file);
+
+            final StringTokenizer st1 = new StringTokenizer(sc.nextLine());
+            final StringTokenizer st2 = new StringTokenizer(sc.nextLine());
+ 
+            loopLength = st2.countTokens();
+            
+
+            array = new float[loopLength ];
+            // Adding lines into an array
+            for (int j = 0; j < loopLength; j++) {
+                array[j] = Float.parseFloat(st2.nextToken());
+            }
+            
+            sc.close();
+                return array;
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+        return temparr;
     }
 
     public static int[] arraySize(final String fileName) {
@@ -94,53 +130,23 @@ public class hello{
            
     }
 
-    public static int comparisons(int numTs, float [][] m, int rows, int cols,String outName) throws InterruptedException{
-        //Variable to hold the number of basins
-        int basinNumber = 0;
+    public static int comparisons(float [][] m, float[] t, int cols, int rows) {
 
-        //Creating the number of thread object
-        Thread[] ts = new Thread[numTs];
+        ForkJoinPool fjpool = new ForkJoinPool();
+        //Variable to hold the number of basins
+        //int basinNumber = 0;
 
         // Assigning values to the grid
-        float[][] matrix;
-        matrix = m;
+        //float[][] matrix;
+        //matrix = m;
 
-        // Changing variables in the loop
-        int counter = 0;
-        float [] threadElements = new float[cols];
-
-        // Adding lines into individaul Threads arrays
-        for (int j = 1; j < rows-1; j++) {
-            
-            for (int i = 0;i<cols; i++){
-                threadElements[i] = matrix[j][i];   
-            }
-            ts[counter] = new Thread(j,matrix,threadElements);
-
-            ts[counter].start();
-            threadElements = new float[cols];
-           
-            counter = counter + 1;
-        }
-
-        //Arraylist to hold columns that represent basins found
-        ArrayList<String> columns = new ArrayList<String>();
-        ArrayList<String> row = new ArrayList<String>();
+        //float[] thread;
+        //thread = t;\
+        Thread right  = new Thread(m,t,0,t.length,cols,rows);
+        return(fjpool.invoke(right));
         
-        //Wrting to output file
-        String tempWriter = "";
-       
-           
-        for(int p = 0;p < numTs;p++){
-            ts[p].join();
-            basinNumber = basinNumber + ts[p].basinNumber; 
-
-            for(int r = 0; r<ts[p].cols.size() ; r ++) {
-                row.add(String.valueOf(ts[p].row));
-                columns.add(String.valueOf(ts[p].cols.get(r)));}
-                                                    }
-           
-        try{
+        // Writing to outfile
+        /*try{
             FileWriter writer = new FileWriter(outName);  
             tempWriter = String.valueOf(basinNumber) + "\n";
             writer.write(tempWriter);
@@ -154,10 +160,8 @@ public class hello{
         catch(IOException e){
             e.printStackTrace();
            
-        }
+        }*/
 
-
-        return basinNumber;
     }
     
 
