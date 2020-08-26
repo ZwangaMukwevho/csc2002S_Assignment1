@@ -1,12 +1,15 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveTask;
+import java.util.*; 
 
 public class Thread extends RecursiveTask<Integer>{
     int basinNumber=0;
     int length;
-    ArrayList<Integer> cols = new ArrayList<Integer>();
-	static final int SEQUENTIAL_CUTOFF=500;
+    static int counter = 0;
+    static Map<Integer,Integer> map = new HashMap<>();
+
+	static final int SEQUENTIAL_CUTOFF=10000;
 
 
     //Each thread will be a specific column 
@@ -35,11 +38,9 @@ public class Thread extends RecursiveTask<Integer>{
         if((hi-lo)< SEQUENTIAL_CUTOFF){
             for(int i = lo; i<hi;i++){
 
-               if(!(lo<col || (hi>length-col))){
-                tempRow = i/row;
-                tempCol = i - col*tempRow; 
-                //System.out.println(tempCol);
-               
+               if(!(i<col || (i>length-col))){
+                    tempRow = i/row;
+                    tempCol = i - col*tempRow; 
               
                     if( !((i%col == 0) || (tempCol+1 ==col))){
                         if( (matrix[tempRow][tempCol-1] - thread[i] >0.01) &&
@@ -51,7 +52,9 @@ public class Thread extends RecursiveTask<Integer>{
                             (matrix[tempRow-1][tempCol+1] - thread[i] >0.01) &&
                             (matrix[tempRow+1][tempCol+1] - thread[i] >0.01) 
                             ){
-                                basinNumber = basinNumber +1; }
+                                basinNumber = basinNumber +1;
+                                map.put(tempRow,tempCol);
+                             }
                             }
                                     }
                 else{
@@ -69,4 +72,8 @@ public class Thread extends RecursiveTask<Integer>{
         }
         
     }
+    public Map<Integer,Integer> rowList(){
+        return map;
+    }
+   
 }

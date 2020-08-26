@@ -4,28 +4,36 @@ import java.io.IOException;
 
 
 public class sequential {
+    static float start = 0;
+    //Arraylist to hold columns that represent basins found
+    static ArrayList<Integer> columns = new ArrayList<Integer>();
+    static ArrayList<Integer> row = new ArrayList<Integer>();
+    static int basinNumber = 0;
 
     public static void main(final String args[]){
 
-        hello helloObject = new hello();
+        //hello helloObject = new hello();
         int[] m = new int[2];
-        m = helloObject.arraySize("large_in.txt");
+        m = hello.arraySize("4600by4600_in.txt");
         int rows = m[0];
         int cols = m[1];
         float[][] matrix = new float[rows][cols];
-        matrix = helloObject.readData("large_in.txt");
-        int result = sequentialComparison(matrix,rows,cols,"large_out.txt");
-        System.out.println(result);
+        matrix = hello.readData("4600by4600_in.txt");
+
+        //Doing Comparisons and writing the output
+        double start = System.nanoTime();
+        sequentialComparison(matrix,rows,cols);
+        double end = System.nanoTime();  
+        System.out.println((end-start)/1000000000);
+      
+        writeOutput("sequential_flarge_out.txt");
+
+        
     }
-    public static int sequentialComparison(float [][] m, int rows, int cols, String outName){
+    public static void sequentialComparison(float [][] m, int rows, int cols){
+    
         float[][] matrix;
         matrix = m;
-
-        int basinNumber = 0;
-
-        //Arraylist to hold columns that represent basins found
-        ArrayList<Integer> columns = new ArrayList<Integer>();
-        ArrayList<Integer> row = new ArrayList<Integer>();
 
         //Array to hold elements that will be looped through in the matrix
         float [] thread = new float[cols];
@@ -48,6 +56,11 @@ public class sequential {
             }
             thread = new float[cols];
         }
+       
+    }
+
+    //Writing to outputFile
+    public static void writeOutput(String outName){
 
             // Variables which hold float when it is converted to string so filewriter can write to outfile
             String tempWriter = "";
@@ -66,8 +79,13 @@ public class sequential {
             catch(IOException e){
                 e.printStackTrace();
             }
-
-        
-        return basinNumber;
     }
+
+    public static void tick(){    
+		start = System.currentTimeMillis();
+	}
+	public static float tock(){
+		return (System.currentTimeMillis() - start) / 1.0f; 
+	}
+
 }
