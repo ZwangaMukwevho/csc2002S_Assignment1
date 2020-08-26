@@ -7,30 +7,30 @@ import java.util.ArrayList;
 import java.util.concurrent.ForkJoinPool;
 
 public class hello{  
+    static long startTime = 0;
+    static Map<Integer,Integer> map = new HashMap<>();
+
     public static void main(final String args[]) {
 
         // Defining local variables
         int[] m = new int[2];
-        m = arraySize("med_in.txt");
+        m = arraySize("4600by4600_in.txt");
         int rows = m[0];
         int cols = m[1];
         float[][] matrix = new float[rows][cols];
         float [] threads = new float[rows*cols];
         
-        matrix =  readData("med_in.txt");
-        threads = singeDimensionArrayData("med_in.txt");
+        matrix =  readData("4600by4600_in.txt");
+        threads = singeDimensionArrayData("4600by4600_in.txt");
 
-        int tempRow = 0;
-        int tempCol = 0;
-        int length = rows*cols; 
-        int basinNumber = 0;
+        double start = System.nanoTime();
         int basins = comparisons(matrix, threads, cols, rows);
-        System.out.println(basins);
-
+        double end = System.nanoTime();
+        System.out.println((end-start)/1000000000);
       
+        writefile("small_out_thread.txt",basins);
         
     }
-
 
     public static float[][] readData(final String fileName ) {
       
@@ -133,37 +133,35 @@ public class hello{
     public static int comparisons(float [][] m, float[] t, int cols, int rows) {
 
         ForkJoinPool fjpool = new ForkJoinPool();
-        //Variable to hold the number of basins
-        //int basinNumber = 0;
+        Thread result  = new Thread(m,t,0,t.length,cols,rows);
+        int basins = fjpool.invoke(result);
+        map = result.rowList();
 
-        // Assigning values to the grid
-        //float[][] matrix;
-        //matrix = m;
+        return(basins); }
 
-        //float[] thread;
-        //thread = t;\
-        Thread right  = new Thread(m,t,0,t.length,cols,rows);
-        return(fjpool.invoke(right));
-        
-        // Writing to outfile
-        /*try{
+    public static void writefile(String outName,int basins){
+        String tempWriter = "";
+        //sortbykey();
+
+        int basinNumber = basins;
+        try{
             FileWriter writer = new FileWriter(outName);  
             tempWriter = String.valueOf(basinNumber) + "\n";
             writer.write(tempWriter);
 
-            for(int s = 0; s<row.size();s++){
-                tempWriter = row.get(s) + " " + columns.get(s) + "\n";
+            // Sorting the columns and rows 
+            ArrayList<Integer> sortedKeys = new ArrayList<Integer>(map.keySet()); 
+            Collections.sort(sortedKeys); 
+
+            for (Integer x : sortedKeys) {
+                tempWriter =  String.valueOf(x) + " " + String.valueOf(map.get(x)) + "\n";
                 writer.write(tempWriter);
             }
             writer.close();
         }
         catch(IOException e){
-            e.printStackTrace();
-           
-        }*/
-
+            e.printStackTrace();  } 
     }
     
-
-    
+   
 }
